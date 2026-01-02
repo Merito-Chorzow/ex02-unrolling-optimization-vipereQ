@@ -56,5 +56,5 @@ SECTIONS
     _ebss = .;
   } > RAM
 
-  _end = .;
+    end = .;
 }

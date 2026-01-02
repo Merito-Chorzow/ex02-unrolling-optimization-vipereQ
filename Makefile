@@ -1,15 +1,23 @@
 TOOL=arm-none-eabi
-CFLAGS=-mcpu=cortex-m3 -mthumb -O2 -g -ffreestanding -nostdlib
-LDFLAGS=-T boards/qemu-mps2/linker.ld -Wl,--gc-sections -nostartfiles
+
+BASEFLAGS=-mcpu=cortex-m3 -mthumb -g -ffreestanding
+LDFLAGS=-T boards/qemu-mps2/linker.ld -Wl,--gc-sections -nostartfiles --specs=rdimon.specs -lc -lrdimon
+
 SRC=$(wildcard src/*.c) $(wildcard asm/*.S) boards/qemu-mps2/startup.S
 OUT=build/firmware.elf
 
-all:
-\tmkdir -p build
-\t$(TOOL)-gcc $(CFLAGS) $(LDFLAGS) -o $(OUT) $(SRC)
+O0: CFLAGS=$(BASEFLAGS) -O0
+O2: CFLAGS=$(BASEFLAGS) -O2
+O3: CFLAGS=$(BASEFLAGS) -O3
+
+O0 O2 O3:
+	cmd /C if not exist build mkdir build
+	$(TOOL)-gcc $(CFLAGS) $(LDFLAGS) -o $(OUT) $(SRC)
 
 size:
-\t$(TOOL)-size $(OUT)
+	$(TOOL)-size $(OUT)
 
 clean:
-\trm -f $(OUT)
+	cmd /C del /Q $(OUT) 2>NUL || exit 0
+
+
